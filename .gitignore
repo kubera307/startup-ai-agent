@@ -1,0 +1,5 @@
+.env
+staenv/
+__pycache__/
+chroma_db/
+uploads/

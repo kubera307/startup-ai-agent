@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 
 import chromadb
@@ -83,22 +83,7 @@ def answer_question(client, question, context):
         )
 
     prompt = (
-        "Use the context below to answer the user’s question accurately. "
-        "If the answer is not in the context, say so clearly.\n\n"
-        f"Context:\n{context}\n\n"
-        f"Question: {question}"
-    )
-
-def answer_question(client, question, context):
-    """Generate an answer from Cohere using the retrieved context."""
-    if client is None:
-        return (
-            "Please add a valid COHERE_API_KEY to your environment "
-            "to enable AI responses."
-        )
-
-    prompt = (
-        "Use the context below to answer the user's question accurately. "
+        "Use the context below to answer the question accurately. "
         "If the answer is not in the context, say so clearly.\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {question}"
@@ -106,26 +91,33 @@ def answer_question(client, question, context):
 
     try:
         response = client.chat(
-            model="command-nightly",
+            model="command-r",
             messages=[
                 {"role": "user", "content": prompt}
             ],
         )
 
         if hasattr(response, "message") and response.message:
-            if hasattr(response.message, "content") and response.message.content:
-                content = response.message.content
-                if isinstance(content, list) and content:
-                    if hasattr(content[0], "text"):
-                        return content[0].text
-                    return str(content[0])
-                if isinstance(content, str):
-                    return content
+            message = response.message
+            content = getattr(message, "content", None)
+
+            if isinstance(content, list):
+                for item in content:
+                    if hasattr(item, "text"):
+                        return item.text
+                    if isinstance(item, dict) and "text" in item:
+                        return item["text"]
+
+            if isinstance(content, str):
+                return content
+
+        if hasattr(response, "text"):
+            return response.text
 
         return str(response)
 
-    except Exception as e:
+    except Exception as exc:
         return (
-            f"I couldn't generate an answer right now: {str(e)[:100]}\n\n"
+            f"I couldn't generate an answer right now: {str(exc)[:100]}\n\n"
             "Please check your Cohere API key or try again later."
         )

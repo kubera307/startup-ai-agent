@@ -1,5 +1,12 @@
 .env
+.venv/
 staenv/
+sagenv/
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.streamlit/
 chroma_db/
 uploads/
+.DS_Store

@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from pathlib import Path
 
 import streamlit as st
@@ -19,6 +20,8 @@ from rag_chat import (
     answer_question
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # PATHS
@@ -737,7 +740,14 @@ if question:
             })
 
         except Exception as error:
+            logger.exception("Failed to process the user's question")
+
             st.error(
-                f"❌ **An error occurred:** {error}\n\n"
-                f"Please try again or check your settings."
+                "An unexpected error occurred while generating your answer."
             )
+
+            with st.expander("View error details"):
+                st.code(
+                    f"{type(error).__name__}: {error}",
+                    language="text"
+                )
